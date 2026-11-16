@@ -1,0 +1,88 @@
+name: Upload sources
+
+# Run by hand after an app release. It takes the source artifact that the app's own release run produced, checks it, adds the upstream
+# archives the app build does not produce, and publishes everything as one GitHub Release.
+on:
+  workflow_dispatch:
+    inputs:
+      platform:
+        description: Platform of the release
+        type: choice
+        options: [android, apple, windows]
+        required: true
+      app_version:
+        description: App version, for example 1.0.0
+        required: true
+      source_repo:
+        description: Repository (owner/name) whose run produced the artifact
+        required: true
+      run_id:
+        description: ID of that run
+        required: true
+      artifact_name:
+        description: Name of the artifact in that run
+        required: true
+      revision:
+        description: Leave empty for the first release of this version and platform; "r2", "r3" and so on for a re-issue
+        required: false
+        default: ""
+
+permissions:
+  contents: write
+
+concurrency: upload-sources
+
+jobs:
+  upload:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Work out the tag
+        id: tag
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ inputs.app_version }}
+          PLATFORM: ${{ inputs.platform }}
+          REVISION: ${{ inputs.revision }}
+        run: |
+          set -euo pipefail
+          [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+([-.][0-9A-Za-z.]+)?$ ]] || { echo "bad app version" >&2; exit 1; }
+          [[ -z "$REVISION" || "$REVISION" =~ ^r[2-9][0-9]*$ ]] || { echo "revision must be empty or r2, r3, ..." >&2; exit 1; }
+          tag="app-${VERSION}-${PLATFORM}${REVISION:+-$REVISION}"
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          # A published Release is never replaced.
+          if gh release view "$tag" >/dev/null 2>&1; then echo "release $tag already exists; use a revision" >&2; exit 1; fi
+
+      - name: Download the app build's source artifact
+        env:
+          # A token that can read Actions artifacts of the repository that built the app. Kept as a repository secret.
+          GH_TOKEN: ${{ secrets.APP_ARTIFACT_TOKEN }}
+          SOURCE_REPO: ${{ inputs.source_repo }}
+          RUN_ID: ${{ inputs.run_id }}
+          ARTIFACT: ${{ inputs.artifact_name }}
+        run: |
+          set -euo pipefail
+          [[ "$SOURCE_REPO" =~ ^[A-Za-z0-9._-]+/[A-Za-z0-9._-]+$ && "$RUN_ID" =~ ^[0-9]+$ && "$ARTIFACT" =~ ^[A-Za-z0-9._-]+$ ]] || { echo "bad input" >&2; exit 1; }
+          gh run download "$RUN_ID" --repo "$SOURCE_REPO" --name "$ARTIFACT" --dir "$RUNNER_TEMP/artifact"
+          ls -R "$RUNNER_TEMP/artifact"
+
+      - name: Check and collect
+        env:
+          PLATFORM: ${{ inputs.platform }}
+          VERSION: ${{ inputs.app_version }}
+        run: bash scripts/make-release.sh "$PLATFORM" "$VERSION" "$RUNNER_TEMP/artifact" "$RUNNER_TEMP/release"
+
+      - name: Publish the Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.tag.outputs.tag }}
+          PLATFORM: ${{ inputs.platform }}
+          VERSION: ${{ inputs.app_version }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          set -euo pipefail
+          printf 'Source code and build files for the %s build of the app, version %s.\n\nThe files, with their SHA-256 sums, are listed in RELEASE-MANIFEST.txt. How to rebuild is in the README. Uploaded by %s\n' \
+            "$PLATFORM" "$VERSION" "$RUN_URL" > "$RUNNER_TEMP/notes.md"
+          gh release create "$TAG" --title "$TAG" --notes-file "$RUNNER_TEMP/notes.md" "$RUNNER_TEMP"/release/*
