@@ -47,13 +47,14 @@ If something is missing or does not rebuild, open an issue here with the app ver
 ## Written offer
 
 If you received one of the apps, you may ask for the source of its LGPL components for the version you have, on any medium customary for
-software exchange, for at most the cost of making the copy. Open an issue here, or write to the address on the app's website. The Releases
+software exchange, for at most the cost of making the copy. Open an issue here, or write to support@kryspal.net. The Releases
 are the normal way and cost nothing.
 
 ## How the Releases are made
 
-The apps' release builds produce a source artifact in the same run as the app package, so the versions match. The `Upload sources` workflow
-in this repository (`.github/workflows/upload-sources.yml`) is started by hand with the run's ID. It checks the artifact against its checksums,
+The apps' release builds produce their source files in the same run as the app package (for Windows, on a release of the library build),
+so the versions match. The `Upload sources` workflow in this repository (`.github/workflows/upload-sources.yml`) is started by hand with the
+run's ID or release tag. It checks the files against their checksums,
 adds the upstream archives that the app build does not produce (`upstream/pins.env`, pinned by commit), and creates the Release. It never
 overwrites one that exists.
 
