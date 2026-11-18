@@ -1,10 +1,12 @@
 # app-third-party-source
 
-Source code and build files for the open-source components inside the Kryspal Media apps (Android, Apple and Windows).
+Source code, patches and build files for the third-party open-source components used by Kryspal Player on each platform (Android, Apple and Windows).
 
 Some components in the apps are licensed under the GNU Lesser General Public License (LGPL) or similar terms that require the source code
 to be available. This repository is where it is. The code is not kept in the repository itself: **each app release has a matching Release
 here**, with the source archives and build files of that exact app version attached.
+
+If you want to change one of these libraries and use your version in the app, see [REPLACING.md](REPLACING.md).
 
 ## Where to find the source for your version
 
