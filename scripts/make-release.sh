@@ -9,7 +9,9 @@ mkdir -p "$rel"
 
 # 1. Find the files the app build produced. Each platform's artifact has its own layout and carries a SHA256SUMS next to its files.
 case "$platform" in
-  android) root="$art" ;;
+  android) root="$art"
+           # The artifact may hold its files in one directory named after the version; use it when there is no SHA256SUMS at the top.
+           if [ ! -f "$root/SHA256SUMS" ]; then root="$(find "$art" -mindepth 2 -maxdepth 2 -name SHA256SUMS -printf '%h\n' | head -n 1)"; [ -n "$root" ] || root="$art"; fi ;;
   windows) root="$art" ;;
   apple)   root="$(find "$art" -maxdepth 2 -type d -name 'kryspal-apple-source-*' | head -n 1)"; [ -n "$root" ] || { echo "error: no kryspal-apple-source-* directory" >&2; exit 1; } ;;
   *) echo "error: unknown platform $platform" >&2; exit 2 ;;
