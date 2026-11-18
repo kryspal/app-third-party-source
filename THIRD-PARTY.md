@@ -19,7 +19,7 @@ The versions are those in the most recent app builds when this file was written;
 | FriBidi | 1.0.16 | LGPL-2.1-or-later | https://github.com/fribidi/fribidi (tag v1.0.16, 68162babff4f39c4e2dc164a5e825af93bda9983) | In the `Libmpv` framework; prebuilt static library, no patches (see below) |
 | uchardet | 0.0.8 | MPL-1.1, GPL-2.0-or-later or LGPL-2.1-or-later (offered here under LGPL-2.1-or-later or MPL-1.1) | https://gitlab.freedesktop.org/uchardet/uchardet (tag v0.0.8, ae6302a016088ad07177f86d417b20010053632b) | In the `Libmpv` framework; prebuilt static library, no patches (see below) |
 | AetherEngine | 7.44.0 | LGPL-3.0 with an App Store exception | https://github.com/superuser404notfound/AetherEngine | Statically in the app's own player framework; not modified |
-| FFmpeg (second build) | 8.1.3 | LGPL-2.1-or-later | https://github.com/superuser404notfound/FFmpegBuild | Dynamic frameworks next to the player framework. Upstream FFmpeg plus ten patches, prebuilt by that project. The Release currently holds the upstream source only; the patches and the build repositories, pinned by commit, are still to be added |
+| FFmpeg (second build) | 8.1.3 | LGPL-2.1-or-later | https://github.com/superuser404notfound/FFmpegBuild (pinned commit 3b398c8f) | Dynamic frameworks next to the player framework. The Release holds the upstream FFmpeg source plus the build repository with its ten patches, pinned by commit, without binaries |
 | libzvbi | 0.2.45 | LGPL-2.1-or-later | https://github.com/zapping-vbi/zvbi | Dynamic framework next to the player framework |
 
 **Where the prebuilt Apple libraries come from.** FFmpeg and mpv in the `Libmpv` framework are built from source by the MPVKit project
@@ -30,6 +30,8 @@ The shared build package those projects use (mpvkit/BuildShared) is pinned in th
 started; that commit is inferred, because the build logs are past GitHub's retention. These builds are not patched: the build projects
 have no patch directory at the pinned commit. The libraries of permissive licenses that come the same way (libass, HarfBuzz, FreeType,
 libunibreak, dav1d, Little CMS, libdovi, shaderc, glslang, MoltenVK, LuaJIT) are listed on the app's open-source licenses page.
+
+The Release also holds the build repositories of the dual-layer Dolby Vision engine's libraries, pinned by commit and without binaries: FFmpegBuild (3b398c8f), LibDovi (0d7cce1d) and LibTrueHD (aebd5ffe). Their licenses are in those repositories and in the Release manifest.
 
 ## Windows
 
