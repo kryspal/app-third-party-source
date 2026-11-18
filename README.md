@@ -24,7 +24,7 @@ A Release is never changed after it is published.
 | Platform | Components with source here | What the Release holds |
 | --- | --- | --- |
 | Android | FFmpeg (LGPL-2.1-or-later), FriBidi (LGPL-2.1-or-later, inside the libass library) | The FFmpeg release archive and its signature; the build scripts and JNI glue that link FFmpeg into the app (the app's own, small, Apache-2.0 code); the source of the libass library that contains FriBidi, with its submodules |
-| Apple (iOS, tvOS, macOS) | mpv, FFmpeg, libplacebo, FriBidi (all LGPL-2.1-or-later); AetherEngine (LGPL-3.0 with an App Store exception) and the FFmpeg and libzvbi builds next to it | The source trees as built, the patches applied to them, and the scripts that build the frameworks |
+| Apple (iOS, tvOS, macOS) | mpv, FFmpeg, libplacebo, FriBidi, uchardet (all LGPL-2.1-or-later; uchardet also under MPL-1.1); AetherEngine (LGPL-3.0 with an App Store exception) and the FFmpeg and libzvbi builds next to it | The source trees as built, the patches applied to them, and the scripts that build the frameworks |
 | Windows | libmpv with the FFmpeg and libplacebo it is built from (LGPL-2.1-or-later), and the libraries of its build; the Java runtime (Eclipse Temurin, GPLv2 with the Classpath Exception) | The source archive of that libmpv build with its build recipe and build record, the built library, and the unmodified Temurin source |
 
 Components under permissive licenses (MIT, BSD, Apache-2.0 and the like) do not require source to be offered and are listed, with their
