@@ -31,7 +31,15 @@ started; that commit is inferred, because the build logs are past GitHub's reten
 have no patch directory at the pinned commit. The libraries of permissive licenses that come the same way (libass, HarfBuzz, FreeType,
 libunibreak, dav1d, Little CMS, libdovi, shaderc, glslang, MoltenVK, LuaJIT) are listed on the app's open-source licenses page.
 
-The Release also holds the build repositories of the dual-layer Dolby Vision engine's libraries, pinned by commit and without binaries: FFmpegBuild (3b398c8f), LibDovi (0d7cce1d) and LibTrueHD (aebd5ffe). Their licenses are in those repositories and in the Release manifest.
+The Release also holds the build repositories of the dual-layer Dolby Vision engine's libraries, pinned by commit and without binaries: FFmpegBuild (3b398c8f), LibDovi (0d7cce1d) and LibTrueHD (aebd5ffe).
+
+| Build repository | Pinned commit | License | Contents |
+| --- | --- | --- | --- |
+| FFmpegBuild (github.com/superuser404notfound/FFmpegBuild) | 3b398c8f6340fe5fb4a7cb9a2a211a16677171e0 | LGPL-2.1-or-later, as stated in its README (built without --enable-gpl and --enable-version3) | FFmpeg n8.1.3 build scripts and the ten patches |
+| LibDovi (github.com/superuser404notfound/LibDovi) | 0d7cce1d6836a30d13a3a2326e50a153af53f014 | MIT (packaging and build scripts). The library built from it, libdovi 3.4.0 from github.com/quietvoid/dovi_tool, is MIT | Build scripts that fetch and build libdovi |
+| LibTrueHD (github.com/superuser404notfound/LibTrueHD) | aebd5ffe1046dadbea833ce87a75d00fd8b1edd1 | MIT AND Apache-2.0. The Apache-2.0 parts are the truehd and oamd crates (github.com/truehdd/truehdd, github.com/truehdd/oamd), with the NOTICE file kept in that repository | TrueHD / Dolby Atmos decoder with its C API |
+
+The license texts are in those repositories, at the pinned commits, and in the Release.
 
 ## Windows
 
