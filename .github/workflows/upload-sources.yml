@@ -1,7 +1,8 @@
 name: Upload sources
 
 # Run by hand after an app release. It takes the source artifact that the app's own release run produced, checks it, adds the upstream
-# archives the app build does not produce, and publishes everything as one GitHub Release.
+# archives the app build does not produce, and publishes everything as one GitHub Release. If the source is the same as in the latest Release
+# of that platform, it only adds the app version to that Release's notes.
 on:
   workflow_dispatch:
     inputs:
@@ -82,7 +83,41 @@ jobs:
           VERSION: ${{ inputs.app_version }}
         run: bash scripts/make-release.sh "$PLATFORM" "$VERSION" "$RUNNER_TEMP/artifact" "$RUNNER_TEMP/release"
 
+      - name: Compare with the latest Release
+        id: cmp
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PLATFORM: ${{ inputs.platform }}
+          REVISION: ${{ inputs.revision }}
+        run: |
+          set -euo pipefail
+          echo "same=false" >> "$GITHUB_OUTPUT"
+          # A re-issue is always a new Release.
+          if [ -n "$REVISION" ]; then echo "re-issue: no comparison"; exit 0; fi
+          latest="$(gh release list --limit 100 --json tagName,createdAt --jq "map(select(.tagName | test(\"^app-.+-${PLATFORM}(-r[0-9]+)?$\"))) | sort_by(.createdAt) | reverse | .[0].tagName // empty")"
+          if [ -z "$latest" ]; then echo "no earlier Release for $PLATFORM"; exit 0; fi
+          mkdir -p "$RUNNER_TEMP/previous"
+          gh release download "$latest" --dir "$RUNNER_TEMP/previous"
+          if bash scripts/same-source.sh "$RUNNER_TEMP/previous" "$RUNNER_TEMP/release"; then
+            echo "same=true" >> "$GITHUB_OUTPUT"; echo "latest=$latest" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: The source is unchanged, so name the new version in the latest Release
+        if: steps.cmp.outputs.same == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PLATFORM: ${{ inputs.platform }}
+          VERSION: ${{ inputs.app_version }}
+          LATEST: ${{ steps.cmp.outputs.latest }}
+        run: |
+          set -euo pipefail
+          gh release view "$LATEST" --json body --jq .body > "$RUNNER_TEMP/old-notes.md"
+          bash scripts/notes.sh add "$PLATFORM" "$VERSION" "$RUNNER_TEMP/old-notes.md" > "$RUNNER_TEMP/notes.md"
+          gh release edit "$LATEST" --notes-file "$RUNNER_TEMP/notes.md"
+          echo "No new Release: the source is the same as in $LATEST, whose notes now name version $VERSION." >> "$GITHUB_STEP_SUMMARY"
+
       - name: Publish the Release
+        if: steps.cmp.outputs.same != 'true'
         env:
           GH_TOKEN: ${{ github.token }}
           TAG: ${{ steps.tag.outputs.tag }}
@@ -91,6 +126,5 @@ jobs:
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
           set -euo pipefail
-          printf 'Source code and build files for the %s build of the app, version %s.\n\nThe files, with their SHA-256 sums, are listed in RELEASE-MANIFEST.txt. How to rebuild is in the README. Uploaded by %s\n' \
-            "$PLATFORM" "$VERSION" "$RUN_URL" > "$RUNNER_TEMP/notes.md"
+          bash scripts/notes.sh new "$PLATFORM" "$VERSION" "$RUN_URL" > "$RUNNER_TEMP/notes.md"
           gh release create "$TAG" --title "$TAG" --notes-file "$RUNNER_TEMP/notes.md" "$RUNNER_TEMP"/release/*
