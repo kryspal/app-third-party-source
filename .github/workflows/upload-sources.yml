@@ -24,6 +24,10 @@ on:
       artifact_name:
         description: Android and apple, the name of the artifact in that run. Windows, the tag of the (pre)release in the source repository that holds the build
         required: true
+      dry_run:
+        description: Only compare with the latest Release and write the result to the run summary; create nothing
+        type: boolean
+        default: false
       revision:
         description: Leave empty for the first release of this version and platform; "r2", "r3" and so on for a re-issue
         required: false
@@ -93,18 +97,21 @@ jobs:
           set -euo pipefail
           echo "same=false" >> "$GITHUB_OUTPUT"
           # A re-issue is always a new Release.
-          if [ -n "$REVISION" ]; then echo "re-issue: no comparison"; exit 0; fi
+          if [ -n "$REVISION" ]; then echo "re-issue: no comparison" | tee -a "$GITHUB_STEP_SUMMARY"; exit 0; fi
           latest="$(gh release list --limit 100 --json tagName,createdAt --jq "map(select(.tagName | test(\"^app-.+-${PLATFORM}(-r[0-9]+)?$\"))) | sort_by(.createdAt) | reverse | .[0].tagName // empty")"
-          if [ -z "$latest" ]; then echo "no earlier Release for $PLATFORM"; exit 0; fi
+          if [ -z "$latest" ]; then echo "No earlier Release for $PLATFORM: a new Release would be made." | tee -a "$GITHUB_STEP_SUMMARY"; exit 0; fi
           mkdir -p "$RUNNER_TEMP/previous"
           gh release download "$latest" --dir "$RUNNER_TEMP/previous"
-          if bash scripts/same-source.sh "$RUNNER_TEMP/previous" "$RUNNER_TEMP/release"; then
+          if bash scripts/same-source.sh "$RUNNER_TEMP/previous" "$RUNNER_TEMP/release" > "$RUNNER_TEMP/compare.txt"; then
             echo "same=true" >> "$GITHUB_OUTPUT"
             echo "No new Release: the source is the same as in $latest, which applies to this version too." >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "A new Release would be made: the source differs from $latest." >> "$GITHUB_STEP_SUMMARY"
+            { echo '```'; cat "$RUNNER_TEMP/compare.txt"; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
           fi
 
       - name: Publish the Release
-        if: steps.cmp.outputs.same != 'true'
+        if: steps.cmp.outputs.same != 'true' && !inputs.dry_run
         env:
           GH_TOKEN: ${{ github.token }}
           TAG: ${{ steps.tag.outputs.tag }}
