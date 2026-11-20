@@ -104,9 +104,9 @@ jobs:
           gh release download "$latest" --dir "$RUNNER_TEMP/previous"
           if bash scripts/same-source.sh "$RUNNER_TEMP/previous" "$RUNNER_TEMP/release" > "$RUNNER_TEMP/compare.txt"; then
             echo "same=true" >> "$GITHUB_OUTPUT"
-            echo "No new Release: the source is the same as in $latest, which applies to this version too." >> "$GITHUB_STEP_SUMMARY"
+            echo "No new Release: the source is the same as in $latest, which applies to this version too." | tee -a "$GITHUB_STEP_SUMMARY"
           else
-            echo "A new Release would be made: the source differs from $latest." >> "$GITHUB_STEP_SUMMARY"
+            echo "A new Release would be made: the source differs from $latest." | tee -a "$GITHUB_STEP_SUMMARY"; cat "$RUNNER_TEMP/compare.txt"
             { echo '```'; cat "$RUNNER_TEMP/compare.txt"; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
           fi
 
