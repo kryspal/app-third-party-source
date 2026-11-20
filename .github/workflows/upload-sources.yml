@@ -2,7 +2,7 @@ name: Upload sources
 
 # Run by hand after an app release. It takes the source artifact that the app's own release run produced, checks it, adds the upstream
 # archives the app build does not produce, and publishes everything as one GitHub Release. If the source is the same as in the latest Release
-# of that platform, it only adds the app version to that Release's notes.
+# of that platform, it publishes nothing: that Release applies to this version too.
 on:
   workflow_dispatch:
     inputs:
@@ -99,22 +99,9 @@ jobs:
           mkdir -p "$RUNNER_TEMP/previous"
           gh release download "$latest" --dir "$RUNNER_TEMP/previous"
           if bash scripts/same-source.sh "$RUNNER_TEMP/previous" "$RUNNER_TEMP/release"; then
-            echo "same=true" >> "$GITHUB_OUTPUT"; echo "latest=$latest" >> "$GITHUB_OUTPUT"
+            echo "same=true" >> "$GITHUB_OUTPUT"
+            echo "No new Release: the source is the same as in $latest, which applies to this version too." >> "$GITHUB_STEP_SUMMARY"
           fi
-
-      - name: The source is unchanged, so name the new version in the latest Release
-        if: steps.cmp.outputs.same == 'true'
-        env:
-          GH_TOKEN: ${{ github.token }}
-          PLATFORM: ${{ inputs.platform }}
-          VERSION: ${{ inputs.app_version }}
-          LATEST: ${{ steps.cmp.outputs.latest }}
-        run: |
-          set -euo pipefail
-          gh release view "$LATEST" --json body --jq .body > "$RUNNER_TEMP/old-notes.md"
-          bash scripts/notes.sh add "$PLATFORM" "$VERSION" "$RUNNER_TEMP/old-notes.md" > "$RUNNER_TEMP/notes.md"
-          gh release edit "$LATEST" --notes-file "$RUNNER_TEMP/notes.md"
-          echo "No new Release: the source is the same as in $LATEST, whose notes now name version $VERSION." >> "$GITHUB_STEP_SUMMARY"
 
       - name: Publish the Release
         if: steps.cmp.outputs.same != 'true'
@@ -126,5 +113,5 @@ jobs:
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
           set -euo pipefail
-          bash scripts/notes.sh new "$PLATFORM" "$VERSION" "$RUN_URL" > "$RUNNER_TEMP/notes.md"
+          bash scripts/notes.sh "$PLATFORM" "$VERSION" "$RUN_URL" > "$RUNNER_TEMP/notes.md"
           gh release create "$TAG" --title "$TAG" --notes-file "$RUNNER_TEMP/notes.md" "$RUNNER_TEMP"/release/*

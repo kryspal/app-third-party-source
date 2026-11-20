@@ -11,9 +11,10 @@ If you want to change one of these libraries and use your version in the app, se
 ## Where to find the source for your version
 
 1. Open the app's About screen (or its open-source licenses page) and note the app version and platform.
-2. Open the [Releases](../../releases) of this repository and take the one whose notes name your app version and platform ("Used by
-   Kryspal Player for Android 0.1.74 and 0.1.75"). The tag is `app-<version>-<platform>`, for example `app-1.0.0-android`, and it carries
-   the first app version that used this source. The platform is `android`, `apple` or `windows`. If a Release was issued again, its tag
+2. Open the [Releases](../../releases) of this repository and take the newest one for your platform whose tag version is
+   not later than yours. The tag is `app-<version>-<platform>`, for example `app-1.0.0-android`; the notes say "Applies to Kryspal Player
+   for Android 1.0.0 and every later version, until a newer source release for Android is published", because a new Release is made only
+   when the source changes. The platform is `android`, `apple` or `windows`. If a Release was issued again, its tag
    ends in `-r2`, `-r3` and so on; the highest one is the latest.
 3. Every Release has a `RELEASE-MANIFEST.txt` listing its files and a `SHA256SUMS` file. Check the files with
    `sha256sum --check SHA256SUMS`.
@@ -59,8 +60,7 @@ The apps' release builds produce their source files in the same run as the app p
 so the versions match. The `Upload sources` workflow in this repository (`.github/workflows/upload-sources.yml`) is started by hand with the
 run's ID or release tag. It checks the files against their checksums,
 adds the upstream archives that the app build does not produce (`upstream/pins.env`, pinned by commit), and compares the result with the
-latest Release of the same platform (`scripts/same-source.sh`). If the source is the same, no new Release is made and the notes of the latest
-one name the new app version. Otherwise it creates a Release. It never replaces the files of a Release that exists.
+latest Release of the same platform (`scripts/same-source.sh`). If the source is the same, it stops and makes no new Release. Otherwise it creates one. It never replaces the files of a Release that exists.
 
 ## License
 
