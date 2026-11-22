@@ -18,9 +18,9 @@ The versions are those in the most recent app builds when this file was written;
 | libplacebo | 7.360.1 | LGPL-2.1-or-later | https://github.com/haasn/libplacebo (tag v7.360.1, cee9b076f2c63104ccfd497fa79c39a867293ec4) | In the `Libmpv` framework; prebuilt static library, no patches (see below) |
 | FriBidi | 1.0.16 | LGPL-2.1-or-later | https://github.com/fribidi/fribidi (tag v1.0.16, 68162babff4f39c4e2dc164a5e825af93bda9983) | In the `Libmpv` framework; prebuilt static library, no patches (see below) |
 | uchardet | 0.0.8 | MPL-1.1, GPL-2.0-or-later or LGPL-2.1-or-later (offered here under LGPL-2.1-or-later or MPL-1.1) | https://gitlab.freedesktop.org/uchardet/uchardet (tag v0.0.8, ae6302a016088ad07177f86d417b20010053632b) | In the `Libmpv` framework; prebuilt static library, no patches (see below) |
-| AetherEngine | 7.44.0 | LGPL-3.0 with an App Store exception | https://github.com/superuser404notfound/AetherEngine | Statically in the app's own player framework; not modified |
-| FFmpeg (second build) | 8.1.3 | LGPL-2.1-or-later | https://github.com/superuser404notfound/FFmpegBuild (pinned commit 3b398c8f) | Dynamic frameworks next to the player framework. The Release holds the upstream FFmpeg source plus the build repository with its ten patches, pinned by commit, without binaries |
-| libzvbi | 0.2.45 | LGPL-2.1-or-later | https://github.com/zapping-vbi/zvbi | Dynamic framework next to the player framework |
+| AetherEngine | 7.71.2 | LGPL-3.0 with an App Store exception | https://github.com/superuser404notfound/AetherEngine | Statically in the app's own player framework; not modified |
+| FFmpeg (second build) | 8.1.3 | LGPL-2.1-or-later | https://github.com/superuser404notfound/FFmpegBuild (the commit is in the Release manifest) | Dynamic frameworks next to the player framework. The Release holds the upstream FFmpeg source plus the build repository with its patches, pinned by commit, without binaries |
+| libzvbi | 0.2.46 | LGPL-2.1-or-later | https://github.com/zapping-vbi/zvbi | Dynamic framework next to the player framework |
 
 **Where the prebuilt Apple libraries come from.** FFmpeg and mpv in the `Libmpv` framework are built from source by the MPVKit project
 (with the two patches of this app, `mpvkit-formats.patch` and `mpvkit-no-tls.patch`). libplacebo, FriBidi and uchardet are downloaded by
@@ -31,15 +31,17 @@ started; that commit is inferred, because the build logs are past GitHub's reten
 have no patch directory at the pinned commit. The libraries of permissive licenses that come the same way (libass, HarfBuzz, FreeType,
 libunibreak, dav1d, Little CMS, libdovi, shaderc, glslang, MoltenVK, LuaJIT) are listed on the app's open-source licenses page.
 
-The Release also holds the build repositories of the dual-layer Dolby Vision engine's libraries, pinned by commit and without binaries: FFmpegBuild (3b398c8f), LibDovi (0d7cce1d) and LibTrueHD (aebd5ffe).
+The Release also holds the build repositories of the dual-layer Dolby Vision engine's libraries, pinned by commit and without binaries: FFmpegBuild, LibDovi and LibTrueHD. Each Release's manifest gives the commit of each.
 
-| Build repository | Pinned commit | License | Contents |
-| --- | --- | --- | --- |
-| FFmpegBuild (github.com/superuser404notfound/FFmpegBuild) | 3b398c8f6340fe5fb4a7cb9a2a211a16677171e0 | LGPL-2.1-or-later, as stated in its README (built without --enable-gpl and --enable-version3) | FFmpeg n8.1.3 build scripts and the ten patches |
-| LibDovi (github.com/superuser404notfound/LibDovi) | 0d7cce1d6836a30d13a3a2326e50a153af53f014 | MIT (packaging and build scripts). The library built from it, libdovi 3.4.0 from github.com/quietvoid/dovi_tool, is MIT | Build scripts that fetch and build libdovi |
-| LibTrueHD (github.com/superuser404notfound/LibTrueHD) | aebd5ffe1046dadbea833ce87a75d00fd8b1edd1 | MIT AND Apache-2.0. The Apache-2.0 parts are the truehd and oamd crates (github.com/truehdd/truehdd, github.com/truehdd/oamd), with the NOTICE file kept in that repository | TrueHD / Dolby Atmos decoder with its C API |
+| Build repository | License | Contents |
+| --- | --- | --- |
+| FFmpegBuild (github.com/superuser404notfound/FFmpegBuild) | LGPL-2.1-or-later, as stated in its README (built without --enable-gpl and --enable-version3) | FFmpeg n8.1.3 build scripts and the patches |
+| LibDovi (github.com/superuser404notfound/LibDovi) | MIT (packaging and build scripts). The library built from it, libdovi 3.4.0 from github.com/quietvoid/dovi_tool, is MIT | Build scripts that fetch and build libdovi |
+| LibTrueHD (github.com/superuser404notfound/LibTrueHD) | MIT AND Apache-2.0. The Apache-2.0 parts are the truehd and oamd crates (github.com/truehdd/truehdd, github.com/truehdd/oamd), with the NOTICE file kept in that repository | TrueHD / Dolby Atmos decoder with its C API |
 
 The license texts are in those repositories, at the pinned commits, and in the Release.
+
+The archives of upstream projects are unmodified, so they keep whatever the upstream put in them, including test data and text in other languages. The patches of this app carry such lines of the upstream files as context.
 
 ## Windows
 
